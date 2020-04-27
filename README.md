@@ -13,29 +13,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import re
 ```
 
 
 ```python
-# do t-tests
 from scipy import stats
-import sys  
-sys.path.insert(0, '../../stats_probability/dsc-website-ab-testing-lab-online-ds-sp-000/')
-import flatiron_stats as fstats
-```
-
-
-```python
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
-```
-
-
-```python
-import re
 ```
 
 ## 1. Querying Data & Exploratory Data Analysis
@@ -349,7 +337,7 @@ plt.show();
 ```
 
 
-![png](Stats_Prop_Module_files/Stats_Prop_Module_14_0.png)
+![png](Stats_Prop_Module_files/Stats_Prop_Module_12_0.png)
 
 
 The graph above shows each product and the average quantity ordered per order, when the item was discounted (in blue) vs. when the item was not discounted (in orange). Very often it seems as if more quantities were ordered when the item was discounted. However, there are some cases where this isn't the case. We need to further investigate to see if we can safely say that discounting a product encourages buying more of the product.
@@ -398,12 +386,12 @@ plt.show();
 ```
 
 
-![png](Stats_Prop_Module_files/Stats_Prop_Module_21_0.png)
+![png](Stats_Prop_Module_files/Stats_Prop_Module_19_0.png)
 
 
 Plotting the distribution of the two sets of full price vs. discounted, we see there is a tail on orders with large quantities and a skew towards ordering fewer quantities. Below we test for normal distribution to know whether to assume normal distribution of data.
 
-### **Hypothesis 1**
+### **Checking for normal distributions**
 There is no difference between sample & hypothetical normal distribution.
 
 **Acceptance Criteria**: If the calculated value is less than the critical value, accept the null hypothesis.  
@@ -426,7 +414,7 @@ print(stats.kstest(fullprice_df.Quantity, 'norm',
 
 The p-values for both sets of data are 0, which means that we can reject the null hypothesis that the ditribution is normal. This means we should use Welch's T-test which does not assume equal variances.
 
-### Hypothesis 2
+### Checking difference in distributions between two datasets
 There is no difference between the two dataset's distribution
 
 
@@ -439,7 +427,7 @@ print(stats.ks_2samp(fullprice_df.Quantity,discount_df.Quantity))
 
 The third test, tests whether the distribution of the sets differ from each other. The p-value is less than 0.05 which means they come from the same distribution.
 
-### Hypothesis 3
+### Hypothesis 1
 **Question**: From the graph above, we suspect that there is a difference in quantity of items ordered when the item is discounted vs. full price. Here we investigate whether this is true  
 **H0**: There is no difference in quantity of items ordered when there is a discount vs. full price.  
 **H1**: There is an increase in quantity of items ordered when there is a discount.
@@ -465,7 +453,7 @@ print("T-stat: {}, p-value: {}".format(round(t,2), p))
     T-stat: 6.51, p-value: 1.0051255540843165e-10
 
 
-### **Hypothesis 4**
+### **Hypothesis 2**
 **Question**: Is amount of discount significant in predicting quantity of the item per order?  
 **H0**: There is no significant difference in quantity of orders based on the amount of discount.  
 **H1**: There is no significant difference in quantity of orders based on the amount of discount.
@@ -488,7 +476,7 @@ print(table)
 
 Treating each discount group as a categorical variable, and using an anova to test the multiple categories, we get a p-value less than 0.05. This means we can reject the null hypothesis and amount of discount is significant in order quantity 
 
-### **Question:**  At what price is discount significant?
+### **Hypothesis 2(a):**  At what price is discount significant?
 To determine at which discount amount is significant in predicting quantity, we can build a baseline linear regression model, with a categorical vairable for discount amount to investgiate the effect of each group.
 
 
@@ -625,10 +613,10 @@ stats_model.summary()
   <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   9.799</td> 
 </tr>
 <tr>
-  <th>Date:</th>             <td>Sun, 26 Apr 2020</td> <th>  Prob (F-statistic):</th> <td>2.84e-09</td> 
+  <th>Date:</th>             <td>Mon, 27 Apr 2020</td> <th>  Prob (F-statistic):</th> <td>2.84e-09</td> 
 </tr>
 <tr>
-  <th>Time:</th>                 <td>13:23:08</td>     <th>  Log-Likelihood:    </th> <td> -9344.5</td> 
+  <th>Time:</th>                 <td>14:01:17</td>     <th>  Log-Likelihood:    </th> <td> -9344.5</td> 
 </tr>
 <tr>
   <th>No. Observations:</th>      <td>  2147</td>      <th>  AIC:               </th> <td>1.870e+04</td>
@@ -688,7 +676,7 @@ stats_model.summary()
 
 Here we can see that all discounts from 5%-25% are significant in predicting quantity ordered. However, the coefficients show that 10% discount has less of an effect.
 
-### **Hypothesis 5**
+### **Hypothesis 3**
 **Question**: Does unit price & discount have an effect on quantity per order purchased?  
 **H0**: Unit price & discount does not have an effect on quantity purchased.  
 **H1**: Unit price & discount has an effect on total quantity purchased.
@@ -736,10 +724,10 @@ stats_model.summary()
   <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   8.181</td> 
 </tr>
 <tr>
-  <th>Date:</th>             <td>Sun, 26 Apr 2020</td> <th>  Prob (F-statistic):</th> <td>9.07e-09</td> 
+  <th>Date:</th>             <td>Mon, 27 Apr 2020</td> <th>  Prob (F-statistic):</th> <td>9.07e-09</td> 
 </tr>
 <tr>
-  <th>Time:</th>                 <td>13:28:04</td>     <th>  Log-Likelihood:    </th> <td> -9344.4</td> 
+  <th>Time:</th>                 <td>14:01:21</td>     <th>  Log-Likelihood:    </th> <td> -9344.4</td> 
 </tr>
 <tr>
   <th>No. Observations:</th>      <td>  2147</td>      <th>  AIC:               </th> <td>1.870e+04</td>
@@ -802,9 +790,10 @@ stats_model.summary()
 
 UnitPrice does not have an effect on quantity ordered. Both the anova, and the OLS model show that the p-value is not less than 0.05
 
-### **Hypothesis 6**
+### **Hypothesis 4**
 
-**Question** is there an interaction between unit price & discount? The idea is that some low cost items (for example, paper clips) a 5 vs. 25 % discount will be just a few pennies or maybe a dollar.
+**Question** is there an interaction between unit price & discount? The idea is that some low cost items (for example, paper clips) a 5 vs. 25 % discount will be just a few pennies or maybe a dollar.  
+First, let's look more closely at the unit price feature.
 
 
 ```python
@@ -814,12 +803,12 @@ df['UnitPrice'].hist(bins = 50)
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1c1d78f080>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1c19557b38>
 
 
 
 
-![png](Stats_Prop_Module_files/Stats_Prop_Module_50_1.png)
+![png](Stats_Prop_Module_files/Stats_Prop_Module_48_1.png)
 
 
 Looking at the histogram, we could partition the data into three bins, indicating lower cost, medium, and higher cost items. I chose to categorize into bins of unit prices less than \\$25, \\$25-50, and greater than \\$50
@@ -872,7 +861,7 @@ plt.show();
 ```
 
 
-![png](Stats_Prop_Module_files/Stats_Prop_Module_54_0.png)
+![png](Stats_Prop_Module_files/Stats_Prop_Module_52_0.png)
 
 
 This graph plots regression lines for the three bins of cost. It's difficult to see whether high cost items are lower or the same as the other categories when discount amount is low. So the graph below zooms in.
@@ -895,7 +884,7 @@ plt.show();
 ```
 
 
-![png](Stats_Prop_Module_files/Stats_Prop_Module_56_0.png)
+![png](Stats_Prop_Module_files/Stats_Prop_Module_54_0.png)
 
 
 We can see here that there is an interaction between discount & unit price. at 5\% discount the items that are greater than \\$50 have fewer quantities ordered than the other two categories, at 10\% the same as those that are \\$25 - 50, and then after 15\% is surpasses the other two categories. This makes sense as a larger discount on a more expensive items, means the total dollar savings will be greater. 
@@ -905,7 +894,12 @@ We can see here that there is an interaction between discount & unit price. at 5
 
 ```python
 X_interact_categorical = X.drop(columns=['Quantity']).copy()
-X_interact_categorical['UnitPrice_Discount'] = X_interact['UnitPrice_Discount']
+X_interact_categorical['UnitPrice_Discount'] = df['UnitPrice'] * df['Discount']
+```
+
+
+```python
+y = X['Quantity']
 ```
 
 
@@ -932,10 +926,10 @@ results.summary()
   <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th> <td>   7.296</td> 
 </tr>
 <tr>
-  <th>Date:</th>             <td>Sun, 26 Apr 2020</td> <th>  Prob (F-statistic):</th> <td>1.14e-08</td> 
+  <th>Date:</th>             <td>Mon, 27 Apr 2020</td> <th>  Prob (F-statistic):</th> <td>1.14e-08</td> 
 </tr>
 <tr>
-  <th>Time:</th>                 <td>12:43:50</td>     <th>  Log-Likelihood:    </th> <td> -9343.4</td> 
+  <th>Time:</th>                 <td>14:03:50</td>     <th>  Log-Likelihood:    </th> <td> -9343.4</td> 
 </tr>
 <tr>
   <th>No. Observations:</th>      <td>  2147</td>      <th>  AIC:               </th> <td>1.870e+04</td>
@@ -1002,20 +996,6 @@ results.summary()
 The interaction is not significant. 
 
 ### Cross-Validation on Baseline & Interaction models
-
-
-```python
-X.drop(columns=['Quantity', 'UnitPrice']).columns
-```
-
-
-
-
-    Index(['discount_00', 'discount_005', 'discount_01', 'discount_015',
-           'discount_02', 'discount_025'],
-          dtype='object')
-
-
 
 
 ```python
